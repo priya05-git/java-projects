@@ -1,458 +1,823 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AI Exam Proctoring Scheduler</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Exam Proctoring Scheduler</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  :root {
-    --bg0:   #0a0a14;
-    --bg1:   #0f0f1e;
-    --bg2:   #141428;
-    --bg3:   #1a1a38;
-    --border: rgba(255,255,255,.07);
-    --text:   #e2e8f0;
-    --muted:  #64748b;
-    --cyan:   #00d4ff;
-    --green:  #00e57a;
-    --amber:  #ffb300;
-    --red:    #ff4560;
-    --purple: #a855f7;
-    --pink:   #ec4899;
-    --font:   'Sora', sans-serif;
-    --mono:   'JetBrains Mono', monospace;
-  }
+    :root {
+      --bg0: #0a0a14;
+      --bg1: #0f0f1e;
+      --bg2: #141428;
+      --bg3: #1a1a38;
+      --border: rgba(255, 255, 255, .07);
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --cyan: #00d4ff;
+      --green: #00e57a;
+      --amber: #ffb300;
+      --red: #ff4560;
+      --purple: #a855f7;
+      --pink: #ec4899;
+      --font: 'Sora', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
 
-  body {
-    background: var(--bg0);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100vh;
-    padding: 2rem 1.5rem;
-  }
+    body {
+      background: var(--bg0);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
 
-  /* ── Header ─────────────────────────────────────────────── */
-  .header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  .header-icon {
-    width: 48px; height: 48px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 100%);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; flex-shrink: 0;
-  }
-  h1 { font-size: 1.3rem; font-weight: 700; color: var(--cyan); letter-spacing: .02em; }
-  .header-sub { font-size: .7rem; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+    /* ── Header ─────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
 
-  /* ── Controls bar ────────────────────────────────────────── */
-  .controls {
-    display: flex; align-items: center; gap: .75rem;
-    flex-wrap: wrap;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: .9rem 1.2rem;
-    margin-bottom: 1.25rem;
-  }
-  button {
-    font-family: var(--font);
-    font-size: .72rem; font-weight: 600;
-    padding: .5rem 1.1rem;
-    border-radius: 9px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all .18s;
-  }
-  .btn-run   { background: var(--green);  color: #000; border-color: var(--green); }
-  .btn-step  { background: var(--cyan);   color: #000; border-color: var(--cyan); }
-  .btn-reset { background: transparent;   color: var(--muted); }
-  button:hover { filter: brightness(1.12); transform: translateY(-1px); }
-  button:active { transform: scale(.97); }
+    .header-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
 
-  .speed-group { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
-  .speed-label { font-size: .65rem; color: var(--muted); font-family: var(--mono); }
-  input[type=range] { accent-color: var(--cyan); width: 90px; }
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: .02em;
+    }
 
-  .dataset-group { display: flex; align-items: center; gap: .4rem; }
-  .ds-btn {
-    font-size: .65rem; padding: .35rem .75rem;
-    border-radius: 7px; background: transparent;
-    color: var(--muted); border: 1px solid var(--border);
-  }
-  .ds-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+    .header-sub {
+      font-size: .7rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin-top: 2px;
+    }
 
-  /* ── Layout grid ─────────────────────────────────────────── */
-  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-  @media(max-width:700px){ .layout { grid-template-columns: 1fr; } }
+    /* ── Controls bar ────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      flex-wrap: wrap;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: .9rem 1.2rem;
+      margin-bottom: 1.25rem;
+    }
 
-  /* ── Card ────────────────────────────────────────────────── */
-  .card {
-    background: var(--bg1);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.1rem;
-  }
-  .card-title {
-    font-size: .62rem; font-family: var(--mono);
-    text-transform: uppercase; letter-spacing: .1em;
-    color: var(--muted); margin-bottom: .9rem;
-  }
+    button {
+      font-family: var(--font);
+      font-size: .72rem;
+      font-weight: 600;
+      padding: .5rem 1.1rem;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all .18s;
+    }
 
-  /* ── Metrics row ─────────────────────────────────────────── */
-  .metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: .75rem; margin-bottom: 1rem; }
-  @media(max-width:600px){ .metrics { grid-template-columns: repeat(2,1fr); } }
-  .metric { background: var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: .85rem 1rem; }
-  .metric-label { font-size: .6rem; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .metric-value { font-size: 1.55rem; font-weight: 700; font-family: var(--mono); margin-top: .25rem; }
-  .metric-sub   { font-size: .6rem; color: var(--muted); margin-top: .1rem; }
+    .btn-run {
+      background: var(--green);
+      color: #000;
+      border-color: var(--green);
+    }
 
-  /* ── Process list ────────────────────────────────────────── */
-  .proc-list { display: flex; flex-direction: column; gap: .5rem; }
-  .proc-row {
-    display: flex; align-items: center; gap: .7rem;
-    background: var(--bg2);
-    border: 1px solid transparent;
-    border-left: 3px solid transparent;
-    border-radius: 10px;
-    padding: .6rem .9rem;
-    transition: all .3s;
-  }
-  .proc-row.running { border-left-color: var(--green); background: rgba(0,229,122,.04); }
-  .proc-row.done    { opacity: .38; }
-  .proc-row.waiting { border-left-color: var(--border); }
-  .proc-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; }
-  .proc-name { font-size: .77rem; font-weight: 600; flex: 1; }
-  .prio-badge { font-size: .58rem; font-family: var(--mono); padding: 2px 6px; border-radius: 5px; background: rgba(255,255,255,.07); color: #94a3b8; }
-  .age-badge  { font-size: .58rem; font-family: var(--mono); padding: 2px 6px; border-radius: 5px; background: rgba(255,179,0,.12); color: var(--amber); }
-  .proc-detail { font-size: .62rem; color: var(--muted); font-family: var(--mono); margin-top: 3px; }
-  .bar-wrap { width: 80px; height: 5px; background: rgba(255,255,255,.07); border-radius: 3px; overflow: hidden; margin-top: 5px; }
-  .bar-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .status-dot.running { background: var(--green); animation: pulse 1s infinite; }
-  .status-dot.waiting { background: rgba(255,255,255,.15); }
-  .status-dot.done    { background: #1e293b; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.7)} }
+    .btn-step {
+      background: var(--cyan);
+      color: #000;
+      border-color: var(--cyan);
+    }
 
-  /* ── Gantt ───────────────────────────────────────────────── */
-  .gantt-rows { display: flex; flex-direction: column; gap: 7px; }
-  .gantt-row  { display: flex; align-items: center; gap: .6rem; }
-  .gantt-lbl  { font-size: .6rem; font-family: var(--mono); color: var(--muted); width: 100px; flex-shrink: 0; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .gantt-track { flex: 1; height: 22px; background: rgba(255,255,255,.04); border-radius: 5px; position: relative; overflow: hidden; }
-  .gantt-seg  {
-    position: absolute; top: 3px; height: 16px; border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    transition: width .35s ease; min-width: 4px;
-  }
-  .gantt-seg-lbl { font-size: .5rem; font-family: var(--mono); font-weight: 600; color: rgba(0,0,0,.75); white-space: nowrap; padding: 0 3px; overflow: hidden; }
-  .gantt-time { display: flex; justify-content: space-between; margin-top: 4px; }
-  .gantt-tick { font-size: .55rem; font-family: var(--mono); color: var(--muted); }
+    .btn-reset {
+      background: transparent;
+      color: var(--muted);
+    }
 
-  /* ── Log ─────────────────────────────────────────────────── */
-  .log-scroll { max-height: 180px; overflow-y: auto; }
-  .log-entry  { display: flex; gap: .6rem; font-size: .63rem; font-family: var(--mono); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
-  .log-t    { color: #475569; min-width: 30px; }
-  .log-msg  { color: #94a3b8; }
-  .log-msg.run      { color: var(--green); }
-  .log-msg.age      { color: var(--amber); }
-  .log-msg.done     { color: var(--purple); }
-  .log-msg.complete { color: var(--cyan); }
+    button:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+    }
 
-  /* ── Clock ───────────────────────────────────────────────── */
-  .clock { font-family: var(--mono); font-size: 1.25rem; font-weight: 600; color: var(--cyan); min-width: 40px; text-align: right; }
+    button:active {
+      transform: scale(.97);
+    }
 
-  /* ── Aging events ────────────────────────────────────────── */
-  .aging-pills { display: flex; flex-wrap: wrap; gap: .35rem; min-height: 26px; }
-  .a-pill { font-size: .58rem; font-family: var(--mono); padding: 3px 8px; border-radius: 20px; background: rgba(255,179,0,.1); color: var(--amber); border: 1px solid rgba(255,179,0,.2); }
+    .speed-group {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-left: auto;
+    }
 
-  /* ── Comparison table ────────────────────────────────────── */
-  .compare-table { width: 100%; border-collapse: collapse; font-size: .68rem; font-family: var(--mono); }
-  .compare-table th { color: var(--muted); font-weight: 400; text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); font-size: .6rem; text-transform: uppercase; letter-spacing: .06em; }
-  .compare-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,.03); }
-  .compare-table tr:last-child td { border-bottom: none; }
-  .td-good { color: var(--green); }
-  .td-warn { color: var(--amber); }
-  .td-done { color: var(--purple); }
-</style>
-</head>
-<body>
+    .speed-label {
+      font-size: .65rem;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
 
-<!-- Header -->
-<div class="header">
-  <div class="header-icon">🎓</div>
-  <div>
-    <h1>AI Exam Proctoring Scheduler</h1>
-    <div class="header-sub">Priority-Aging Starvation Prevention · Interactive Simulation</div>
-  </div>
-</div>
+    input[type=range] {
+      accent-color: var(--cyan);
+      width: 90px;
+    }
 
-<!-- Controls -->
-<div class="controls">
-  <button class="btn-run" id="btnRun" onclick="toggleRun()">▶ Run</button>
-  <button class="btn-step" onclick="step()">Step →</button>
-  <button class="btn-reset" onclick="reset()">↺ Reset</button>
+    .dataset-group {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
 
-  <div class="dataset-group">
-    <span class="speed-label">Dataset</span>
-    <button class="ds-btn active" id="ds1" onclick="loadDataset(1)">DS1</button>
-    <button class="ds-btn"       id="ds2" onclick="loadDataset(2)">DS2</button>
-    <button class="ds-btn"       id="ds3" onclick="loadDataset(3)">DS3</button>
-  </div>
+    .ds-btn {
+      font-size: .65rem;
+      padding: .35rem .75rem;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
 
-  <div class="speed-group">
-    <span class="speed-label">Speed</span>
-    <input type="range" min="1" max="8" value="3" id="speedSlider" oninput="onSpeed()">
-    <span class="speed-label" id="speedVal">3×</span>
-    <span class="clock" id="clockDisp">t=0</span>
-  </div>
-</div>
+    .ds-btn.active {
+      background: var(--purple);
+      color: #fff;
+      border-color: var(--purple);
+    }
 
-<!-- Metrics -->
-<div class="metrics">
-  <div class="metric">
-    <div class="metric-label">Completed</div>
-    <div class="metric-value" id="mDone" style="color:var(--green)">0</div>
-    <div class="metric-sub">tasks</div>
-  </div>
-  <div class="metric">
-    <div class="metric-label">Avg Wait</div>
-    <div class="metric-value" id="mWait" style="color:var(--amber)">0</div>
-    <div class="metric-sub">time units</div>
-  </div>
-  <div class="metric">
-    <div class="metric-label">Starvation</div>
-    <div class="metric-value" id="mStarve" style="color:var(--pink)">0</div>
-    <div class="metric-sub">events prevented</div>
-  </div>
-  <div class="metric">
-    <div class="metric-label">Aging Boosts</div>
-    <div class="metric-value" id="mBoosts" style="color:var(--purple)">0</div>
-    <div class="metric-sub">priority bumps</div>
-  </div>
-</div>
+    /* ── Layout grid ─────────────────────────────────────────── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
 
-<!-- Main layout -->
-<div class="layout">
-  <!-- Process Queue -->
-  <div class="card">
-    <div class="card-title">Process queue</div>
-    <div class="proc-list" id="procList"></div>
-  </div>
-
-  <!-- Right column -->
-  <div style="display:flex;flex-direction:column;gap:1rem;">
-    <!-- Aging events -->
-    <div class="card">
-      <div class="card-title">Aging promotions</div>
-      <div class="aging-pills" id="agingPills">
-        <span style="font-size:.62rem;color:#334155;font-family:var(--mono)">Waiting for starvation events…</span>
-      </div>
-    </div>
-
-    <!-- Result table (shown after completion) -->
-    <div class="card" id="resultCard" style="display:none">
-      <div class="card-title">Final metrics</div>
-      <table class="compare-table">
-        <thead><tr><th>Process</th><th>Wait</th><th>TAT</th><th>Boosts</th><th>Status</th></tr></thead>
-        <tbody id="resultTable"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- Gantt -->
-<div class="card" style="margin-bottom:1rem">
-  <div class="card-title">Gantt chart — CPU timeline</div>
-  <div class="gantt-rows" id="ganttRows"></div>
-  <div class="gantt-time" id="ganttTime"></div>
-</div>
-
-<!-- Log -->
-<div class="card">
-  <div class="card-title">Execution log</div>
-  <div class="log-scroll" id="logWrap"></div>
-</div>
-
-<script>
-// ── Constants ──────────────────────────────────────────────────
-const K = 1, THRESHOLD = 3;
-
-// ── Dataset definitions ────────────────────────────────────────
-const DATASETS = {
-  1: [
-    {id:'CD',name:'Cheating Detection', icon:'👁', color:'#ff4560', burst:5, prio:1},
-    {id:'FV',name:'Face Verification',  icon:'🙂', color:'#a855f7', burst:3, prio:2},
-    {id:'AM',name:'Audio Monitoring',   icon:'🎙', color:'#00d4ff', burst:2, prio:3},
-    {id:'AL',name:'Attendance Logging', icon:'📋', color:'#00e57a', burst:4, prio:5},
-  ],
-  2: [
-    {id:'CD',name:'Cheating Detection', icon:'👁', color:'#ff4560', burst:8, prio:1},
-    {id:'FV',name:'Face Verification',  icon:'🙂', color:'#a855f7', burst:6, prio:2},
-    {id:'AM',name:'Audio Monitoring',   icon:'🎙', color:'#00d4ff', burst:4, prio:3},
-    {id:'SM',name:'Screen Monitor',     icon:'🖥', color:'#ffb300', burst:5, prio:4},
-    {id:'AL',name:'Attendance Logging', icon:'📋', color:'#00e57a', burst:7, prio:5},
-    {id:'RG',name:'Report Generation',  icon:'📊', color:'#ec4899', burst:3, prio:6},
-  ],
-  3: [
-    {id:'CD',name:'Cheating Detection', icon:'👁', color:'#ff4560', burst:12, prio:1},
-    {id:'FV',name:'Face Verification',  icon:'🙂', color:'#a855f7', burst:9,  prio:2},
-    {id:'TB',name:'Tab-Switch Detect',  icon:'🔀', color:'#f97316', burst:4,  prio:2},
-    {id:'AM',name:'Audio Monitoring',   icon:'🎙', color:'#00d4ff', burst:6,  prio:3},
-    {id:'EM',name:'Eye Movement Track', icon:'👀', color:'#06b6d4', burst:5,  prio:3},
-    {id:'SM',name:'Screen Monitor',     icon:'🖥', color:'#ffb300', burst:8,  prio:4},
-    {id:'AL',name:'Attendance Logging', icon:'📋', color:'#00e57a', burst:10, prio:5},
-    {id:'RG',name:'Report Generation',  icon:'📊', color:'#ec4899', burst:7,  prio:6},
-  ],
-};
-
-// ── State ──────────────────────────────────────────────────────
-let state, speed = 3, running = false, stepTimer;
-
-function initState(dsNum) {
-  const defs = DATASETS[dsNum];
-  return {
-    ds: dsNum,
-    procs: defs.map(d => ({...d, origPrio: d.prio, wait: 0, done: false, agingBoosts: 0, startT: -1, endT: -1})),
-    time: 0,
-    log: [],
-    gantt: Object.fromEntries(defs.map(d => [d.id, []])),
-    agingEvents: [],
-    starvationEvents: 0,
-    totalBoosts: 0,
-    totalWait: 0,
-  };
-}
-
-function loadDataset(n) {
-  clearInterval(stepTimer); running = false; document.getElementById('btnRun').textContent = '▶ Run';
-  [1,2,3].forEach(i => document.getElementById('ds'+i).classList.toggle('active', i===n));
-  state = initState(n);
-  document.getElementById('resultCard').style.display = 'none';
-  addLog('Dataset '+n+' loaded — '+state.procs.length+' processes queued.', '');
-  render();
-}
-
-function reset() {
-  clearInterval(stepTimer); running = false; document.getElementById('btnRun').textContent = '▶ Run';
-  state = initState(state.ds);
-  document.getElementById('resultCard').style.display = 'none';
-  addLog('Reset — all processes restored.', '');
-  render();
-}
-
-// ── Scheduling step ────────────────────────────────────────────
-function step() {
-  if (state.procs.every(p => p.done)) { finalize(); return; }
-
-  const queue = state.procs.filter(p => !p.done)
-    .sort((a,b) => a.prio - b.prio || a.origPrio - b.origPrio);
-
-  const cur = queue[0];
-  cur.startT = state.time;
-  addLog(`RUN: ${cur.name} [P${cur.prio}] burst=${cur.burst} wait=${cur.wait}`, 'run');
-
-  for (let t = 0; t < cur.burst; t++) state.gantt[cur.id].push(state.time + t);
-  state.time += cur.burst;
-  cur.endT = state.time;
-  cur.done = true;
-  state.totalWait += queue.slice(1).reduce((s, p) => s + cur.burst, 0);
-
-  queue.slice(1).forEach(p => {
-    p.wait += cur.burst;
-    if (p.wait > THRESHOLD) {
-      const old = p.prio;
-      p.prio = Math.max(1, p.prio - K);
-      if (p.prio < old) {
-        p.agingBoosts++;
-        state.totalBoosts++;
-        state.agingEvents.push({id: p.id, name: p.name, from: old, to: p.prio, t: state.time});
-        if (old === p.origPrio) state.starvationEvents++;
-        addLog(`  AGING: ${p.name} P${old}→P${p.prio} (waited ${p.wait})`, 'age');
+    @media(max-width:700px) {
+      .layout {
+        grid-template-columns: 1fr;
       }
     }
-  });
 
-  if (state.procs.every(p => p.done)) {
-    addLog('All processes complete.', 'complete');
-    finalize();
-  }
-  render();
-}
+    /* ── Card ────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem;
+    }
 
-function finalize() {
-  clearInterval(stepTimer); running = false;
-  document.getElementById('btnRun').textContent = '▶ Run';
-  // Show result table
-  document.getElementById('resultCard').style.display = 'block';
-  const tbody = document.getElementById('resultTable');
-  tbody.innerHTML = state.procs.map(p => {
-    const tat = p.endT;
-    return `<tr>
+    .card-title {
+      font-size: .62rem;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: .9rem;
+    }
+
+    /* ── Metrics row ─────────────────────────────────────────── */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .75rem;
+      margin-bottom: 1rem;
+    }
+
+    @media(max-width:600px) {
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .metric {
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+    }
+
+    .metric-label {
+      font-size: .6rem;
+      font-family: var(--mono);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .metric-value {
+      font-size: 1.55rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      margin-top: .25rem;
+    }
+
+    .metric-sub {
+      font-size: .6rem;
+      color: var(--muted);
+      margin-top: .1rem;
+    }
+
+    /* ── Process list ────────────────────────────────────────── */
+    .proc-list {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .proc-row {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      background: var(--bg2);
+      border: 1px solid transparent;
+      border-left: 3px solid transparent;
+      border-radius: 10px;
+      padding: .6rem .9rem;
+      transition: all .3s;
+    }
+
+    .proc-row.running {
+      border-left-color: var(--green);
+      background: rgba(0, 229, 122, .04);
+    }
+
+    .proc-row.done {
+      opacity: .38;
+    }
+
+    .proc-row.waiting {
+      border-left-color: var(--border);
+    }
+
+    .proc-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+
+    .proc-name {
+      font-size: .77rem;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .prio-badge {
+      font-size: .58rem;
+      font-family: var(--mono);
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, .07);
+      color: #94a3b8;
+    }
+
+    .age-badge {
+      font-size: .58rem;
+      font-family: var(--mono);
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: rgba(255, 179, 0, .12);
+      color: var(--amber);
+    }
+
+    .proc-detail {
+      font-size: .62rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin-top: 3px;
+    }
+
+    .bar-wrap {
+      width: 80px;
+      height: 5px;
+      background: rgba(255, 255, 255, .07);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .5s ease;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot.running {
+      background: var(--green);
+      animation: pulse 1s infinite;
+    }
+
+    .status-dot.waiting {
+      background: rgba(255, 255, 255, .15);
+    }
+
+    .status-dot.done {
+      background: #1e293b;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(.7)
+      }
+    }
+
+    /* ── Gantt ───────────────────────────────────────────────── */
+    .gantt-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .gantt-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    .gantt-lbl {
+      font-size: .6rem;
+      font-family: var(--mono);
+      color: var(--muted);
+      width: 100px;
+      flex-shrink: 0;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .gantt-track {
+      flex: 1;
+      height: 22px;
+      background: rgba(255, 255, 255, .04);
+      border-radius: 5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gantt-seg {
+      position: absolute;
+      top: 3px;
+      height: 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: width .35s ease;
+      min-width: 4px;
+    }
+
+    .gantt-seg-lbl {
+      font-size: .5rem;
+      font-family: var(--mono);
+      font-weight: 600;
+      color: rgba(0, 0, 0, .75);
+      white-space: nowrap;
+      padding: 0 3px;
+      overflow: hidden;
+    }
+
+    .gantt-time {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .gantt-tick {
+      font-size: .55rem;
+      font-family: var(--mono);
+      color: var(--muted);
+    }
+
+    /* ── Log ─────────────────────────────────────────────────── */
+    .log-scroll {
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      display: flex;
+      gap: .6rem;
+      font-size: .63rem;
+      font-family: var(--mono);
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+    }
+
+    .log-t {
+      color: #475569;
+      min-width: 30px;
+    }
+
+    .log-msg {
+      color: #94a3b8;
+    }
+
+    .log-msg.run {
+      color: var(--green);
+    }
+
+    .log-msg.age {
+      color: var(--amber);
+    }
+
+    .log-msg.done {
+      color: var(--purple);
+    }
+
+    .log-msg.complete {
+      color: var(--cyan);
+    }
+
+    /* ── Clock ───────────────────────────────────────────────── */
+    .clock {
+      font-family: var(--mono);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--cyan);
+      min-width: 40px;
+      text-align: right;
+    }
+
+    /* ── Aging events ────────────────────────────────────────── */
+    .aging-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+      min-height: 26px;
+    }
+
+    .a-pill {
+      font-size: .58rem;
+      font-family: var(--mono);
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(255, 179, 0, .1);
+      color: var(--amber);
+      border: 1px solid rgba(255, 179, 0, .2);
+    }
+
+    /* ── Comparison table ────────────────────────────────────── */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .68rem;
+      font-family: var(--mono);
+    }
+
+    .compare-table th {
+      color: var(--muted);
+      font-weight: 400;
+      text-align: left;
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+      font-size: .6rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .compare-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, .03);
+    }
+
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .td-good {
+      color: var(--green);
+    }
+
+    .td-warn {
+      color: var(--amber);
+    }
+
+    .td-done {
+      color: var(--purple);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">🎓</div>
+    <div>
+      <h1>AI Exam Proctoring Scheduler</h1>
+      <div class="header-sub">Priority-Aging Starvation Prevention · Interactive Simulation</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-run" id="btnRun" onclick="toggleRun()">▶ Run</button>
+    <button class="btn-step" onclick="step()">Step →</button>
+    <button class="btn-reset" onclick="reset()">↺ Reset</button>
+
+    <div class="dataset-group">
+      <span class="speed-label">Dataset</span>
+      <button class="ds-btn active" id="ds1" onclick="loadDataset(1)">DS1</button>
+      <button class="ds-btn" id="ds2" onclick="loadDataset(2)">DS2</button>
+      <button class="ds-btn" id="ds3" onclick="loadDataset(3)">DS3</button>
+    </div>
+
+    <div class="speed-group">
+      <span class="speed-label">Speed</span>
+      <input type="range" min="1" max="8" value="3" id="speedSlider" oninput="onSpeed()">
+      <span class="speed-label" id="speedVal">3×</span>
+      <span class="clock" id="clockDisp">t=0</span>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Completed</div>
+      <div class="metric-value" id="mDone" style="color:var(--green)">0</div>
+      <div class="metric-sub">tasks</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Avg Wait</div>
+      <div class="metric-value" id="mWait" style="color:var(--amber)">0</div>
+      <div class="metric-sub">time units</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Starvation</div>
+      <div class="metric-value" id="mStarve" style="color:var(--pink)">0</div>
+      <div class="metric-sub">events prevented</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Aging Boosts</div>
+      <div class="metric-value" id="mBoosts" style="color:var(--purple)">0</div>
+      <div class="metric-sub">priority bumps</div>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="layout">
+    <!-- Process Queue -->
+    <div class="card">
+      <div class="card-title">Process queue</div>
+      <div class="proc-list" id="procList"></div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <!-- Aging events -->
+      <div class="card">
+        <div class="card-title">Aging promotions</div>
+        <div class="aging-pills" id="agingPills">
+          <span style="font-size:.62rem;color:#334155;font-family:var(--mono)">Waiting for starvation events…</span>
+        </div>
+      </div>
+
+      <!-- Result table (shown after completion) -->
+      <div class="card" id="resultCard" style="display:none">
+        <div class="card-title">Final metrics</div>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Process</th>
+              <th>Wait</th>
+              <th>TAT</th>
+              <th>Boosts</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="resultTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gantt -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-title">Gantt chart — CPU timeline</div>
+    <div class="gantt-rows" id="ganttRows"></div>
+    <div class="gantt-time" id="ganttTime"></div>
+  </div>
+
+  <!-- Log -->
+  <div class="card">
+    <div class="card-title">Execution log</div>
+    <div class="log-scroll" id="logWrap"></div>
+  </div>
+
+  <script>
+    // ── Constants ──────────────────────────────────────────────────
+    const K = 1, THRESHOLD = 3;
+
+    // ── Dataset definitions ────────────────────────────────────────
+    const DATASETS = {
+      1: [
+        { id: 'CD', name: 'Cheating Detection', icon: '👁', color: '#ff4560', burst: 5, prio: 1 },
+        { id: 'FV', name: 'Face Verification', icon: '🙂', color: '#a855f7', burst: 3, prio: 2 },
+        { id: 'AM', name: 'Audio Monitoring', icon: '🎙', color: '#00d4ff', burst: 2, prio: 3 },
+        { id: 'AL', name: 'Attendance Logging', icon: '📋', color: '#00e57a', burst: 4, prio: 5 },
+      ],
+      2: [
+        { id: 'CD', name: 'Cheating Detection', icon: '👁', color: '#ff4560', burst: 8, prio: 1 },
+        { id: 'FV', name: 'Face Verification', icon: '🙂', color: '#a855f7', burst: 6, prio: 2 },
+        { id: 'AM', name: 'Audio Monitoring', icon: '🎙', color: '#00d4ff', burst: 4, prio: 3 },
+        { id: 'SM', name: 'Screen Monitor', icon: '🖥', color: '#ffb300', burst: 5, prio: 4 },
+        { id: 'AL', name: 'Attendance Logging', icon: '📋', color: '#00e57a', burst: 7, prio: 5 },
+        { id: 'RG', name: 'Report Generation', icon: '📊', color: '#ec4899', burst: 3, prio: 6 },
+      ],
+      3: [
+        { id: 'CD', name: 'Cheating Detection', icon: '👁', color: '#ff4560', burst: 12, prio: 1 },
+        { id: 'FV', name: 'Face Verification', icon: '🙂', color: '#a855f7', burst: 9, prio: 2 },
+        { id: 'TB', name: 'Tab-Switch Detect', icon: '🔀', color: '#f97316', burst: 4, prio: 2 },
+        { id: 'AM', name: 'Audio Monitoring', icon: '🎙', color: '#00d4ff', burst: 6, prio: 3 },
+        { id: 'EM', name: 'Eye Movement Track', icon: '👀', color: '#06b6d4', burst: 5, prio: 3 },
+        { id: 'SM', name: 'Screen Monitor', icon: '🖥', color: '#ffb300', burst: 8, prio: 4 },
+        { id: 'AL', name: 'Attendance Logging', icon: '📋', color: '#00e57a', burst: 10, prio: 5 },
+        { id: 'RG', name: 'Report Generation', icon: '📊', color: '#ec4899', burst: 7, prio: 6 },
+      ],
+    };
+
+    // ── State ──────────────────────────────────────────────────────
+    let state, speed = 3, running = false, stepTimer;
+
+    function initState(dsNum) {
+      const defs = DATASETS[dsNum];
+      return {
+        ds: dsNum,
+        procs: defs.map(d => ({ ...d, origPrio: d.prio, wait: 0, done: false, agingBoosts: 0, startT: -1, endT: -1 })),
+        time: 0,
+        log: [],
+        gantt: Object.fromEntries(defs.map(d => [d.id, []])),
+        agingEvents: [],
+        starvationEvents: 0,
+        totalBoosts: 0,
+        totalWait: 0,
+      };
+    }
+
+    function loadDataset(n) {
+      clearInterval(stepTimer); running = false; document.getElementById('btnRun').textContent = '▶ Run';
+      [1, 2, 3].forEach(i => document.getElementById('ds' + i).classList.toggle('active', i === n));
+      state = initState(n);
+      document.getElementById('resultCard').style.display = 'none';
+      addLog('Dataset ' + n + ' loaded — ' + state.procs.length + ' processes queued.', '');
+      render();
+    }
+
+    function reset() {
+      clearInterval(stepTimer); running = false; document.getElementById('btnRun').textContent = '▶ Run';
+      state = initState(state.ds);
+      document.getElementById('resultCard').style.display = 'none';
+      addLog('Reset — all processes restored.', '');
+      render();
+    }
+
+    // ── Scheduling step ────────────────────────────────────────────
+    function step() {
+      if (state.procs.every(p => p.done)) { finalize(); return; }
+
+      const queue = state.procs.filter(p => !p.done)
+        .sort((a, b) => a.prio - b.prio || a.origPrio - b.origPrio);
+
+      const cur = queue[0];
+      cur.startT = state.time;
+      addLog(`RUN: ${cur.name} [P${cur.prio}] burst=${cur.burst} wait=${cur.wait}`, 'run');
+
+      for (let t = 0; t < cur.burst; t++) state.gantt[cur.id].push(state.time + t);
+      state.time += cur.burst;
+      cur.endT = state.time;
+      cur.done = true;
+      state.totalWait += queue.slice(1).reduce((s, p) => s + cur.burst, 0);
+
+      queue.slice(1).forEach(p => {
+        p.wait += cur.burst;
+        if (p.wait > THRESHOLD) {
+          const old = p.prio;
+          p.prio = Math.max(1, p.prio - K);
+          if (p.prio < old) {
+            p.agingBoosts++;
+            state.totalBoosts++;
+            state.agingEvents.push({ id: p.id, name: p.name, from: old, to: p.prio, t: state.time });
+            if (old === p.origPrio) state.starvationEvents++;
+            addLog(`  AGING: ${p.name} P${old}→P${p.prio} (waited ${p.wait})`, 'age');
+          }
+        }
+      });
+
+      if (state.procs.every(p => p.done)) {
+        addLog('All processes complete.', 'complete');
+        finalize();
+      }
+      render();
+    }
+
+    function finalize() {
+      clearInterval(stepTimer); running = false;
+      document.getElementById('btnRun').textContent = '▶ Run';
+      // Show result table
+      document.getElementById('resultCard').style.display = 'block';
+      const tbody = document.getElementById('resultTable');
+      tbody.innerHTML = state.procs.map(p => {
+        const tat = p.endT;
+        return `<tr>
       <td>${p.name}</td>
       <td class="${p.wait > 6 ? 'td-warn' : 'td-good'}">${p.wait}</td>
       <td class="td-done">${tat}</td>
       <td class="${p.agingBoosts > 0 ? 'td-warn' : ''}">${p.agingBoosts}</td>
       <td class="td-good">✓ Done</td>
     </tr>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-function addLog(msg, cls) {
-  state.log.unshift({t: state.time, msg, cls});
-  if (state.log.length > 80) state.log.pop();
-}
+    function addLog(msg, cls) {
+      state.log.unshift({ t: state.time, msg, cls });
+      if (state.log.length > 80) state.log.pop();
+    }
 
-// ── Auto-run ───────────────────────────────────────────────────
-function toggleRun() {
-  if (running) {
-    clearInterval(stepTimer); running = false;
-    document.getElementById('btnRun').textContent = '▶ Run';
-  } else {
-    if (state.procs.every(p => p.done)) reset();
-    running = true;
-    document.getElementById('btnRun').textContent = '⏸ Pause';
-    const go = () => {
-      if (!running || state.procs.every(p => p.done)) { running = false; document.getElementById('btnRun').textContent = '▶ Run'; return; }
-      step();
-      clearInterval(stepTimer);
-      stepTimer = setInterval(go, Math.max(150, 900 / speed));
-    };
-    stepTimer = setInterval(go, Math.max(150, 900 / speed));
-  }
-}
+    // ── Auto-run ───────────────────────────────────────────────────
+    function toggleRun() {
+      if (running) {
+        clearInterval(stepTimer); running = false;
+        document.getElementById('btnRun').textContent = '▶ Run';
+      } else {
+        if (state.procs.every(p => p.done)) reset();
+        running = true;
+        document.getElementById('btnRun').textContent = '⏸ Pause';
+        const go = () => {
+          if (!running || state.procs.every(p => p.done)) { running = false; document.getElementById('btnRun').textContent = '▶ Run'; return; }
+          step();
+          clearInterval(stepTimer);
+          stepTimer = setInterval(go, Math.max(150, 900 / speed));
+        };
+        stepTimer = setInterval(go, Math.max(150, 900 / speed));
+      }
+    }
 
-function onSpeed() {
-  speed = +document.getElementById('speedSlider').value;
-  document.getElementById('speedVal').textContent = speed + '×';
-}
+    function onSpeed() {
+      speed = +document.getElementById('speedSlider').value;
+      document.getElementById('speedVal').textContent = speed + '×';
+    }
 
-// ── Render ─────────────────────────────────────────────────────
-function render() {
-  document.getElementById('clockDisp').textContent = 't=' + state.time;
+    // ── Render ─────────────────────────────────────────────────────
+    function render() {
+      document.getElementById('clockDisp').textContent = 't=' + state.time;
 
-  // Metrics
-  document.getElementById('mDone').textContent   = state.procs.filter(p => p.done).length;
-  const avgW = state.procs.length > 1 ? Math.round(state.totalWait / (state.procs.length - 1)) : 0;
-  document.getElementById('mWait').textContent   = avgW;
-  document.getElementById('mStarve').textContent = state.starvationEvents;
-  document.getElementById('mBoosts').textContent = state.totalBoosts;
+      // Metrics
+      document.getElementById('mDone').textContent = state.procs.filter(p => p.done).length;
+      const avgW = state.procs.length > 1 ? Math.round(state.totalWait / (state.procs.length - 1)) : 0;
+      document.getElementById('mWait').textContent = avgW;
+      document.getElementById('mStarve').textContent = state.starvationEvents;
+      document.getElementById('mBoosts').textContent = state.totalBoosts;
 
-  // Process list
-  const sorted = [...state.procs].sort((a,b) => a.prio - b.prio);
-  const running_proc = sorted.find(p => !p.done);
-  document.getElementById('procList').innerHTML = sorted.map(p => {
-    const isRun = running_proc && p.id === running_proc.id;
-    const stCls = p.done ? 'done' : isRun ? 'running' : 'waiting';
-    const dotCls = p.done ? 'done' : isRun ? 'running' : 'waiting';
-    const pct = p.done ? 100 : isRun ? 55 : 0;
-    return `<div class="proc-row ${stCls}">
+      // Process list
+      const sorted = [...state.procs].sort((a, b) => a.prio - b.prio);
+      const running_proc = sorted.find(p => !p.done);
+      document.getElementById('procList').innerHTML = sorted.map(p => {
+        const isRun = running_proc && p.id === running_proc.id;
+        const stCls = p.done ? 'done' : isRun ? 'running' : 'waiting';
+        const dotCls = p.done ? 'done' : isRun ? 'running' : 'waiting';
+        const pct = p.done ? 100 : isRun ? 55 : 0;
+        return `<div class="proc-row ${stCls}">
       <div class="proc-icon" style="background:${p.color}20">${p.icon}</div>
       <div style="flex:1">
         <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
@@ -465,45 +830,46 @@ function render() {
       </div>
       <div class="status-dot ${dotCls}"></div>
     </div>`;
-  }).join('');
+      }).join('');
 
-  // Aging pills
-  const ae = state.agingEvents;
-  document.getElementById('agingPills').innerHTML = ae.length === 0
-    ? `<span style="font-size:.62rem;color:#334155;font-family:var(--mono)">No aging events yet…</span>`
-    : ae.slice(-10).map(e => `<span class="a-pill">${e.id}: P${e.from}→P${e.to} @t${e.t}</span>`).join('');
+      // Aging pills
+      const ae = state.agingEvents;
+      document.getElementById('agingPills').innerHTML = ae.length === 0
+        ? `<span style="font-size:.62rem;color:#334155;font-family:var(--mono)">No aging events yet…</span>`
+        : ae.slice(-10).map(e => `<span class="a-pill">${e.id}: P${e.from}→P${e.to} @t${e.t}</span>`).join('');
 
-  // Gantt
-  const T = state.time || 1;
-  const defs = DATASETS[state.ds];
-  document.getElementById('ganttRows').innerHTML = defs.map(p => {
-    const slots = state.gantt[p.id];
-    if (!slots || !slots.length) return `<div class="gantt-row"><div class="gantt-lbl">${p.name.split(' ')[0]}</div><div class="gantt-track"></div></div>`;
-    const s = slots[0], e = slots[slots.length-1] + 1;
-    const lp = (s/T*100).toFixed(1), wp = ((e-s)/T*100).toFixed(1);
-    return `<div class="gantt-row">
-      <div class="gantt-lbl" style="color:${p.color}">${p.name.split(' ').slice(0,2).join(' ')}</div>
+      // Gantt
+      const T = state.time || 1;
+      const defs = DATASETS[state.ds];
+      document.getElementById('ganttRows').innerHTML = defs.map(p => {
+        const slots = state.gantt[p.id];
+        if (!slots || !slots.length) return `<div class="gantt-row"><div class="gantt-lbl">${p.name.split(' ')[0]}</div><div class="gantt-track"></div></div>`;
+        const s = slots[0], e = slots[slots.length - 1] + 1;
+        const lp = (s / T * 100).toFixed(1), wp = ((e - s) / T * 100).toFixed(1);
+        return `<div class="gantt-row">
+      <div class="gantt-lbl" style="color:${p.color}">${p.name.split(' ').slice(0, 2).join(' ')}</div>
       <div class="gantt-track">
         <div class="gantt-seg" style="left:${lp}%;width:${wp}%;background:${p.color}99">
           <span class="gantt-seg-lbl">${p.id}</span>
         </div>
       </div>
     </div>`;
-  }).join('');
+      }).join('');
 
-  document.getElementById('ganttTime').innerHTML =
-    `<span class="gantt-tick">0</span><span class="gantt-tick" style="color:var(--cyan)">${state.time}</span>`;
+      document.getElementById('ganttTime').innerHTML =
+        `<span class="gantt-tick">0</span><span class="gantt-tick" style="color:var(--cyan)">${state.time}</span>`;
 
-  // Log
-  document.getElementById('logWrap').innerHTML = state.log
-    .map(e => `<div class="log-entry"><span class="log-t">${e.t}</span><span class="log-msg ${e.cls}">${e.msg}</span></div>`)
-    .join('');
-}
+      // Log
+      document.getElementById('logWrap').innerHTML = state.log
+        .map(e => `<div class="log-entry"><span class="log-t">${e.t}</span><span class="log-msg ${e.cls}">${e.msg}</span></div>`)
+        .join('');
+    }
 
-// ── Bootstrap ──────────────────────────────────────────────────
-state = initState(1);
-addLog('System ready. Press Run or Step to begin.', '');
-render();
-</script>
+    // ── Bootstrap ──────────────────────────────────────────────────
+    state = initState(1);
+    addLog('System ready. Press Run or Step to begin.', '');
+    render();
+  </script>
 </body>
+
 </html>
