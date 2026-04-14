@@ -1,0 +1,313 @@
+
+<style>
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  @keyframes slide-in { from{transform:translateX(-8px);opacity:0} to{transform:translateX(0);opacity:1} }
+  @keyframes warn { 0%,100%{background:#FCEBEB} 50%{background:#F7C1C1} }
+  .task-item { animation: slide-in .25s ease; }
+  .brake-warn { animation: warn .4s ease 2; }
+  .badge { display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;letter-spacing:.02em; }
+  .running-dot { display:inline-block;width:8px;height:8px;border-radius:50%;animation:pulse .8s ease-in-out infinite; }
+</style>
+
+<div style="padding:1rem 0">
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1rem">
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px">Tasks processed</div>
+      <div id="stat-processed" style="font-size:22px;font-weight:500;color:var(--color-text-primary)">0</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px">Interrupts fired</div>
+      <div id="stat-interrupts" style="font-size:22px;font-weight:500;color:var(--color-text-danger)">0</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px">RL reward</div>
+      <div id="stat-reward" style="font-size:22px;font-weight:500;color:var(--color-text-success)">0.0</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem">
+
+    <div>
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;font-size:11px">Sensors</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;color:var(--color-text-primary)">Camera</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="cam-status" style="font-size:12px;color:var(--color-text-secondary)">scanning...</span>
+            <span id="cam-dot" class="running-dot" style="background:#639922"></span>
+          </div>
+        </div>
+        <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;color:var(--color-text-primary)">Proximity</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="prox-status" style="font-size:12px;color:var(--color-text-secondary)">--m</span>
+            <span id="prox-dot" class="running-dot" style="background:#639922"></span>
+          </div>
+        </div>
+        <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;color:var(--color-text-primary)">GPS</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="gps-status" style="font-size:12px;color:var(--color-text-secondary)">idle</span>
+            <span id="gps-dot" class="running-dot" style="background:#639922"></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Current execution</div>
+        <div id="exec-box" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px;min-height:54px">
+          <div style="font-size:12px;color:var(--color-text-tertiary)">idle — waiting for task</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">RL agent</div>
+        <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px">
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">Q-table state</div>
+          <div id="rl-state" style="font-size:13px;color:var(--color-text-primary)">Observing...</div>
+          <div id="rl-action" style="font-size:12px;color:var(--color-text-secondary);margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Priority queue</div>
+      <div id="queue-display" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px;min-height:120px;max-height:180px;overflow:hidden">
+        <div style="font-size:12px;color:var(--color-text-tertiary);padding:4px">Queue is empty</div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Event log</div>
+        <div id="log-display" style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px;height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:2px">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button id="btn-start" onclick="startSim()" style="font-size:13px;padding:7px 16px">Start simulation</button>
+    <button id="btn-stop" onclick="stopSim()" style="font-size:13px;padding:7px 16px" disabled>Stop</button>
+    <button onclick="injectBrake()" style="font-size:13px;padding:7px 16px;border-color:var(--color-border-danger);color:var(--color-text-danger)">Inject brake !</button>
+    <button onclick="resetSim()" style="font-size:13px;padding:7px 16px">Reset</button>
+    <span style="font-size:12px;color:var(--color-text-tertiary);margin-left:4px">Speed:</span>
+    <input type="range" min="0.5" max="3" step="0.5" value="1" id="speed-slider" style="width:90px" oninput="setSpeed(this.value)">
+    <span id="speed-label" style="font-size:12px;color:var(--color-text-secondary);min-width:28px">1x</span>
+  </div>
+</div>
+
+<script>
+const COLORS = {
+  BRAKE:      { bg:'#FCEBEB', text:'#A32D2D', border:'#F09595' },
+  STEERING:   { bg:'#FAEEDA', text:'#633806', border:'#EF9F27' },
+  NAVIGATION: { bg:'#EAF3DE', text:'#27500A', border:'#97C459' }
+};
+
+let simRunning = false;
+let timers = [];
+let queue = [];
+let currentTask = null;
+let execTimer = null;
+let stats = { processed:0, interrupts:0, reward:0 };
+let speedMult = 1;
+let qTable = [[0,0.5,0.2],[0.1,0.3,0.8],[0.5,0.2,1.0]];
+const ALPHA=0.1, GAMMA=0.9, EPSILON=0.15;
+
+function t(ms){ return Math.round(ms / speedMult); }
+
+function log(msg, type='info'){
+  const el = document.getElementById('log-display');
+  const row = document.createElement('div');
+  const colors = {brake:'#A32D2D', interrupt:'#993C1D', rl:'#3C3489', info:'var(--color-text-secondary)'};
+  row.style.cssText = `font-size:11px;color:${colors[type]||colors.info};line-height:1.5;`;
+  row.textContent = `${new Date().toLocaleTimeString('en',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'})} ${msg}`;
+  el.appendChild(row);
+  el.scrollTop = el.scrollHeight;
+  if(el.children.length > 80) el.removeChild(el.firstChild);
+}
+
+function renderQueue(){
+  const el = document.getElementById('queue-display');
+  if(queue.length === 0){
+    el.innerHTML = '<div style="font-size:12px;color:var(--color-text-tertiary);padding:4px">Queue is empty</div>';
+    return;
+  }
+  const sorted = [...queue].sort((a,b)=>a.priority-b.priority);
+  el.innerHTML = sorted.map((t,i)=>{
+    const c = COLORS[t.type];
+    return `<div class="task-item" style="display:flex;align-items:center;justify-content:space-between;background:${c.bg};border:0.5px solid ${c.border};border-radius:6px;padding:5px 8px;margin-bottom:4px">
+      <span style="font-size:12px;font-weight:500;color:${c.text}">${t.type}</span>
+      <span style="font-size:11px;color:${c.text};opacity:.8">P${t.priority} · ${t.source}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderExec(){
+  const el = document.getElementById('exec-box');
+  if(!currentTask){
+    el.innerHTML = '<div style="font-size:12px;color:var(--color-text-tertiary)">idle — waiting for task</div>';
+    el.style.borderColor = 'var(--color-border-tertiary)';
+    return;
+  }
+  const c = COLORS[currentTask.type];
+  el.style.borderColor = c.border;
+  el.innerHTML = `<div style="display:flex;align-items:center;gap:8px">
+    <span class="running-dot" style="background:${c.text}"></span>
+    <span style="font-size:13px;font-weight:500;color:${c.text}">${currentTask.type}</span>
+    <span class="badge" style="background:${c.bg};color:${c.text};border:0.5px solid ${c.border}">P${currentTask.priority}</span>
+  </div>
+  <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">from ${currentTask.source}</div>`;
+}
+
+function updateStats(){
+  document.getElementById('stat-processed').textContent = stats.processed;
+  document.getElementById('stat-interrupts').textContent = stats.interrupts;
+  document.getElementById('stat-reward').textContent = stats.reward.toFixed(1);
+}
+
+function enqueue(type, source, priority){
+  const task = { type, source, priority: priority || {BRAKE:1,STEERING:2,NAVIGATION:3}[type], id: Math.random() };
+  queue.push(task);
+  log(`Enqueued ${type} (P${task.priority}) from ${source}`);
+  if(type==='BRAKE' && currentTask && currentTask.type !== 'BRAKE'){
+    stats.interrupts++;
+    log(`INTERRUPT — preempting ${currentTask.type} for BRAKE`, 'interrupt');
+    const preempted = currentTask;
+    clearTimeout(execTimer);
+    currentTask = null;
+    queue.push({...preempted});
+  }
+  renderQueue();
+  renderExec();
+  updateStats();
+  scheduleExec();
+}
+
+function scheduleExec(){
+  if(currentTask || queue.length===0) return;
+  queue.sort((a,b)=>a.priority-b.priority);
+  currentTask = queue.shift();
+  renderQueue();
+  renderExec();
+  const dur = {BRAKE:t(500),STEERING:t(1200),NAVIGATION:t(2000)}[currentTask.type];
+  log(`Executing ${currentTask.type} (${dur}ms)`);
+  execTimer = setTimeout(()=>{
+    stats.processed++;
+    const brakeCount = queue.filter(x=>x.type==='BRAKE').length;
+    const reward = brakeCount===0 ? 1 : -2*brakeCount;
+    stats.reward += reward;
+    log(`Done: ${currentTask.type} | reward ${reward>=0?'+':''}${reward.toFixed(1)}`);
+    currentTask = null;
+    renderExec();
+    updateStats();
+    scheduleExec();
+  }, dur);
+}
+
+function rlTick(){
+  const load = queue.length;
+  const state = load<=2?0:load<=5?1:2;
+  const stateLabel = ['low load','mid load','high load'][state];
+  const action = Math.random()<EPSILON ? Math.floor(Math.random()*3)-1 : bestAction(state);
+  const actionLabel = action>0?'raise priority':action<0?'lower priority':'hold';
+  document.getElementById('rl-state').textContent = `State: ${stateLabel} (queue: ${load})`;
+  document.getElementById('rl-action').textContent = `Action: ${actionLabel}`;
+  if(action!==0){
+    queue.forEach(task=>{
+      if(task.type==='BRAKE') return;
+      const old = task.priority;
+      task.priority = Math.max(1,Math.min(10,task.priority-action));
+      if(old!==task.priority) log(`RL: ${task.type} P${old}→P${task.priority}`, 'rl');
+    });
+    renderQueue();
+  }
+  const brakeCount = queue.filter(x=>x.type==='BRAKE').length;
+  const reward = brakeCount===0?1:-2*brakeCount;
+  updateQTable(state, action+1, reward, state);
+}
+
+function bestAction(state){
+  const row=qTable[state];
+  let best=0;
+  for(let i=1;i<row.length;i++) if(row[i]>row[best]) best=i;
+  return best-1;
+}
+function updateQTable(s,a,r,ns){
+  const best=Math.max(...qTable[ns]);
+  qTable[s][a]+=ALPHA*(r+GAMMA*best-qTable[s][a]);
+}
+
+function sensorCamera(){
+  if(!simRunning) return;
+  const obstacle = Math.random()<0.22;
+  document.getElementById('cam-status').textContent = obstacle ? 'OBSTACLE!' : 'clear';
+  document.getElementById('cam-dot').style.background = obstacle ? '#E24B4A' : '#639922';
+  if(obstacle){ log('Camera: obstacle detected!','brake'); enqueue('BRAKE','Camera'); }
+  else log('Camera: lane clear');
+}
+function sensorProx(){
+  if(!simRunning) return;
+  const d = 10+Math.floor(Math.random()*90);
+  document.getElementById('prox-status').textContent = d+'m';
+  document.getElementById('prox-dot').style.background = d<30?'#E24B4A':d<60?'#BA7517':'#639922';
+  if(d<30){ log(`Proximity: ${d}m — braking!`,'brake'); enqueue('BRAKE','Sensor'); }
+  else if(d<60){ log(`Proximity: ${d}m — steering adj.`); enqueue('STEERING','Sensor'); }
+  else log(`Proximity: ${d}m`);
+}
+function sensorGPS(){
+  if(!simRunning) return;
+  document.getElementById('gps-status').textContent = 'waypoint';
+  setTimeout(()=>document.getElementById('gps-status').textContent='idle', t(600));
+  log('GPS: waypoint received');
+  enqueue('NAVIGATION','GPS');
+}
+
+function startSim(){
+  if(simRunning) return;
+  simRunning = true;
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
+  log('Simulation started');
+  timers.push(setInterval(sensorCamera, t(1500)));
+  timers.push(setInterval(sensorProx,  t(900)));
+  timers.push(setInterval(sensorGPS,   t(2200)));
+  timers.push(setInterval(rlTick,      t(700)));
+}
+
+function stopSim(){
+  simRunning = false;
+  timers.forEach(clearInterval);
+  timers = [];
+  clearTimeout(execTimer);
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  log('Simulation paused');
+}
+
+function resetSim(){
+  stopSim();
+  queue = []; currentTask = null;
+  stats = {processed:0,interrupts:0,reward:0};
+  qTable = [[0,0.5,0.2],[0.1,0.3,0.8],[0.5,0.2,1.0]];
+  renderQueue(); renderExec(); updateStats();
+  document.getElementById('log-display').innerHTML='';
+  document.getElementById('rl-state').textContent='Observing...';
+  document.getElementById('rl-action').textContent='';
+  document.getElementById('cam-status').textContent='scanning...';
+  document.getElementById('prox-status').textContent='--m';
+  document.getElementById('gps-status').textContent='idle';
+  log('System reset.');
+}
+
+function injectBrake(){
+  log('Manual BRAKE injected!','brake');
+  enqueue('BRAKE','Manual');
+}
+
+function setSpeed(v){
+  speedMult = parseFloat(v);
+  document.getElementById('speed-label').textContent = v+'x';
+}
+
+renderQueue(); renderExec(); updateStats();
+</script>
